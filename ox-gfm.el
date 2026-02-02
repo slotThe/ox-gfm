@@ -54,7 +54,11 @@
             (lambda (a s v b)
               (if a (org-gfm-export-to-markdown t s v)
                 (org-open-file (org-gfm-export-to-markdown nil s v)))))))
+  :options-alist
+  '((:fields nil nil '(title date tags))
+    (:tags "TAGS" nil nil split))
   :translate-alist '((inner-template . org-gfm-inner-template)
+                     (template . org-gfm-template)
                      (paragraph . org-gfm-paragraph)
                      (strike-through . org-gfm-strike-through)
                      (example-block . org-gfm-example-block)
@@ -254,7 +258,30 @@ INFO is a plist used as a communication channel."
                    (org-trim (org-export-data def info))))
                 fn-alist "\n"))))
 
+;;;; YAML Front Matter
+
+(defun org-gfm--get-yaml (field info)
+  "Get the value for FIELD from INFO plist.
+Returns nil if the field is empty or disabled."
+  (pcase field
+    ('title (and (plist-get info :with-title) (car (plist-get info :title))))
+    ('date  (and (plist-get info :with-date ) (car (plist-get info :date))))
+    ('tags  (and (plist-get info :with-tags ) (mapconcat #'identity (plist-get info :tags) " ")))))
+
+(defun org-gfm--build-yaml (info)
+  "Build YAML front matter string from INFO plist.
+Returns nil if no fields have values."
+  (when-let* ((lines (--map (format "%s: %s" it (org-gfm--get-yaml it info))
+                            (plist-get info :fields))))
+    (concat "---\n" (mapconcat #'identity lines "\n") "\n---\n\n")))
+
 ;;;; Template
+
+(defun org-gfm-template (contents info)
+  "Return complete document string after GFM conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist holding
+export options."
+  (concat (org-gfm--build-yaml info) contents))
 
 (defun org-gfm-inner-template (contents info)
   "Return body of document after converting it to Markdown syntax.
