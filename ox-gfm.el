@@ -1,11 +1,13 @@
 ;;; ox-gfm.el --- Github Flavored Markdown Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2017 Lars Tveito
+;;               2026      Tony Zorman
 
 ;; Author: Lars Tveito
+;; Maintainer: Tony Zorman <mail@tony-zorman.com>
 ;; Keywords: org, wp, markdown, github
 
-;; This file is not part of GNU Emacs.
+;; This file is NOT part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,7 +24,7 @@
 
 ;;; Commentary:
 
-;; This library implements a Markdown back-end (github flavor) for Org
+;; This library implements a Markdown back-end (github flavour) for Org
 ;; exporter, based on the `md' back-end.
 
 ;;; Code:
@@ -30,7 +32,6 @@
 (require 'ox-md)
 (require 'ox-publish)
 
-
 ;;; User-Configurable Variables
 
 (defgroup org-export-gfm nil
@@ -40,7 +41,6 @@
   :version "24.4"
   :package-version '(Org . "8.0"))
 
-
 ;;; Define Back-End
 
 (org-export-define-derived-backend 'gfm 'md
@@ -67,7 +67,6 @@
                      (table-row . org-gfm-table-row)
                      (table . org-gfm-table)))
 
-
 ;;; Transcode Functions
 
 ;;;; Paragraph
@@ -296,7 +295,6 @@ holding export options."
          (toc-tail (if headlines "\n\n" "")))
     (org-trim (concat toc-string toc-tail contents "\n" (org-gfm-footnote-section info)))))
 
-
 ;;; Interactive function
 
 ;;;###autoload
@@ -371,5 +369,4 @@ Return output file name."
   (org-publish-org-to 'gfm filename ".md" plist pub-dir))
 
 (provide 'ox-gfm)
-
 ;;; ox-gfm.el ends here
