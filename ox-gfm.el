@@ -65,7 +65,8 @@
                      (src-block . org-gfm-src-block)
                      (table-cell . org-gfm-table-cell)
                      (table-row . org-gfm-table-row)
-                     (table . org-gfm-table)))
+                     (table . org-gfm-table)
+                     (footnote-reference . org-gfm-footnote-reference)))
 
 ;;; Transcode Functions
 
@@ -237,25 +238,22 @@ contextual information."
                      (org-export-get-reference headline info))))
     (concat indent "- [" title "]" "(#" anchor ")")))
 
-;;;; Footnote section
+;;;; Footnotes
+
+(defun org-gfm-footnote-reference (footnote-reference _contents info)
+  "Transcode a FOOTNOTE-REFERENCE element into GFM format.
+_CONTENTS is nil.  INFO is a plist holding contextual information."
+  (format "[^%d]" (org-export-get-footnote-number footnote-reference info)))
 
 (defun org-gfm-footnote-section (info)
   "Format the footnote section.
 INFO is a plist used as a communication channel."
   (and-let* ((fn-alist (org-export-collect-footnote-definitions info)))
-    (format
-     "## Footnotes\n\n%s\n"
-     (mapconcat (pcase-lambda (`(,n ,_type ,def))
-                  (format
-                   "%s %s\n"
-                   (format (plist-get info :html-footnote-format)
-                           (org-html--anchor
-                            (format "fn.%d" n)
-                            n
-                            (format " class=\"footnum\" href=\"#fnr.%d\"" n)
-                            info))
-                   (org-trim (org-export-data def info))))
-                fn-alist "\n"))))
+    (format "%s\n"
+            (mapconcat (pcase-lambda (`(,n ,_type ,def))
+                         (format "[^%d]: %s" n (org-trim (org-export-data def info))))
+                       fn-alist
+                       "\n\n"))))
 
 ;;;; YAML Front Matter
 
