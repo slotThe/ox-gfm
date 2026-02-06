@@ -1,29 +1,59 @@
-[![MELPA](http://melpa.org/packages/ox-gfm-badge.svg)](http://melpa.org/#/ox-gfm)
 # Github Flavored Markdown exporter for Org Mode
 
-This is a small exporter based on the Markdown exporter already existing in
-Org mode. It should support the features [listed here](https://help.github.com/articles/github-flavored-markdown/).
+> [!NOTE]
+> This is a fork of [larstvei/ox-gfm](https://github.com/larstvei/ox-gfm).
+
+This is a small exporter based on the Markdown exporter already existing
+in Org mode. It should support most features listed in
+[GitHubs GFM docs](https://help.github.com/articles/github-flavored-markdown/).
 
 ## Installation
 
-You can install `ox-gfm` using elpa. It's available on [melpa](http://melpa.org/#/ox-gfm):
+You can install `ox-gfm` using `package-vc.el`:
 
-<kbd> M-x package-install ox-gfm </kbd>
+``` emacs-lisp
+(package-vc-install "https://codeberg.org/slotThe/ox-gfm")
+```
+
+or, if you use use-package:
+
+``` emacs-lisp
+(use-package ox-gfm
+  :vc (:url "https://codeberg.org/slotThe/ox-gfm"))
+```
 
 ## Usage
 
-This package adds an Org mode export backend for GitHub Flavored Markdown. You
-can read more about [Org mode exporting here.](http://orgmode.org/manual/Exporting.html)
+This package adds an Org mode export backend for GitHub Flavoured
+Markdown; see the [Exporting section](http://orgmode.org/manual/Exporting.html)
+in the Org manual. You should find a new menu entry upon executing
+`org-export-dispatch`, once this package is loaded.
 
-Exporting to Github Flavored Markdown is available through Org
-mode's [export dispatcher](http://orgmode.org/manual/The-export-dispatcher.html#The-export-dispatcher)
-once `ox-gfm` is loaded. Alternatively, exporting can be triggered by calling the
-(autoloaded) function `M-x org-gfm-export-to-markdown`.
+## Comparison to upstream
 
-If you want to automatically load `ox-gfm` along with Org mode, then you can
-add this snippet to your Emacs configuration:
+This fork adds some features for [Hakyll](https://jaspervdj.be/hakyll/) compatibility:
 
-```emacs-lisp
-(eval-after-load "org"
-  '(require 'ox-gfm nil t))
-```
++ YAML front-matter export: the Org mode properties `#+title:`,
+  `#+date:`, and `#+tags:` are exported as YAML front-matter at the top
+  of the document:
+
+  ``` org
+  #+title: My Post
+  #+date: 2026-02-01
+  #+tags: emacs, org-mode
+  ```
+
+  becomes:
+
+  ``` yaml
+  ---
+  title: My Post
+  date: 2026-02-01
+  tags: emacs, org-mode
+  ---
+  ```
+
++ Footnotes: Instead of some gnarly inline HTML, footnotes are exported
+  using the `[^n]` syntax, which is how pandoc wants to see footnotes to
+  export them properly. There's also no footnotes section anymore, they
+  are just tacked onto the end of the document.
