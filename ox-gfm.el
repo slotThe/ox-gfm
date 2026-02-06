@@ -5,7 +5,10 @@
 
 ;; Author: Lars Tveito
 ;; Maintainer: Tony Zorman <mail@tony-zorman.com>
-;; Keywords: org, wp, markdown, github
+;; Version: 0.1
+;; Homepage: https://codeberg.org/slotThe/ox-gfm
+;; Keywords: org, vc
+;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -110,28 +113,28 @@ holding contextual information."
 
 ;;;; Table-Common
 
-(defvar width-cookies nil)
-(defvar width-cookies-table nil)
+(defvar org-gfm-width-cookies nil)
+(defvar org-gfm-width-cookies-table nil)
 
-(defconst gfm-table-left-border "|")
-(defconst gfm-table-right-border " |")
-(defconst gfm-table-separator " |")
+(defconst org-gfm-table-left-border "|")
+(defconst org-gfm-table-right-border " |")
+(defconst org-gfm-table-separator " |")
 
 (defun org-gfm-table-col-width (table column info)
   "Return width of TABLE at given COLUMN.
 INFO is a plist used as communication channel.  Width of a column
-is determined either by inquerying `width-cookies' in the column,
+is determined either by inquerying `org-gfm-width-cookies' in the column,
 or by the maximum cell with in the column."
-  (let ((cookie (when (hash-table-p width-cookies)
-                  (gethash column width-cookies))))
-    (if (and (eq table width-cookies-table)
+  (let ((cookie (when (hash-table-p org-gfm-width-cookies)
+                  (gethash column org-gfm-width-cookies))))
+    (if (and (eq table org-gfm-width-cookies-table)
              (not (eq nil cookie)))
         cookie
       (progn
-        (unless (and (eq table width-cookies-table)
-                     (hash-table-p width-cookies))
-          (setq width-cookies (make-hash-table))
-          (setq width-cookies-table table))
+        (unless (and (eq table org-gfm-width-cookies-table)
+                     (hash-table-p org-gfm-width-cookies))
+          (setq org-gfm-width-cookies (make-hash-table))
+          (setq org-gfm-width-cookies-table table))
         (let ((max-width 0)
               (specialp (org-export-table-has-special-column-p table)))
           (org-element-map
@@ -148,7 +151,7 @@ or by the maximum cell with in the column."
                            info))
                          max-width)))
             info)
-          (puthash column max-width width-cookies))))))
+          (puthash column max-width org-gfm-width-cookies))))))
 
 (defun org-gfm-make-hline-builder (table info char)
   "Return a function to build horizontal line in TABLE with given CHAR.
@@ -193,11 +196,11 @@ communication channel."
              (build-rule (org-gfm-make-hline-builder table info ?-))
              (cols (cdr (org-export-table-dimensions table info))))
         (setq contents
-              (concat gfm-table-left-border
+              (concat org-gfm-table-left-border
                       (mapconcat (lambda (col) (funcall build-rule col))
                                  (number-sequence 0 (- cols 1))
-                                 gfm-table-separator)
-                      gfm-table-right-border))))
+                                 org-gfm-table-separator)
+                      org-gfm-table-right-border))))
     contents))
 
 ;;;; Table
@@ -214,15 +217,15 @@ contextual information."
             (let ((build-empty-cell (org-gfm-make-hline-builder table info ?\s))
                   (build-rule (org-gfm-make-hline-builder table info ?-))
                   (columns (number-sequence 0 (- cols 1))))
-              (concat gfm-table-left-border
+              (concat org-gfm-table-left-border
                       (mapconcat (lambda (col) (funcall build-empty-cell col))
                                  columns
-                                 gfm-table-separator)
-                      gfm-table-right-border "\n" gfm-table-left-border
+                                 org-gfm-table-separator)
+                      org-gfm-table-right-border "\n" org-gfm-table-left-border
                       (mapconcat (lambda (col) (funcall build-rule col))
                                  columns
-                                 gfm-table-separator)
-                      gfm-table-right-border "\n")))))
+                                 org-gfm-table-separator)
+                      org-gfm-table-right-border "\n")))))
     (concat (and no-header (funcall build-dummy-header))
             (replace-regexp-in-string "\n\n" "\n" contents))))
 
