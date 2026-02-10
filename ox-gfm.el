@@ -271,8 +271,8 @@ Returns nil if the field is empty or disabled."
 (defun org-gfm--build-yaml (info)
   "Build YAML front matter string from INFO plist.
 Returns nil if no fields have values."
-  (when-let* ((lines (--map (format "%s: %s" it (org-gfm--get-yaml it info))
-                            (plist-get info :fields))))
+  (when-let* ((lines (mapcar (lambda (f) (format "%s: %s" f (org-gfm--get-yaml f info)))
+                             (plist-get info :fields))))
     (concat "---\n" (mapconcat #'identity lines "\n") "\n---\n\n")))
 
 ;;;; Template
