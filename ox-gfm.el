@@ -91,13 +91,19 @@ communication channel."
 
 (defun org-gfm-src-block (src-block _contents info)
   "Transcode SRC-BLOCK element into Github Flavored Markdown format.
-_CONTENTS is nil.  INFO is a plist used as a communication
-channel."
+_CONTENTS is nil.  INFO is a plist used as a communication channel.
+This correctly preserves the indentation of the src-block itself (but
+not indentation /within/ the block, see `org-src-preserve-indentation'
+for that)."
   (let* ((lang (org-element-property :language src-block))
          (code (org-export-format-code-default src-block info))
-         (prefix (concat "```" lang "\n"))
-         (suffix "```"))
-    (concat prefix code suffix)))
+         (ind (save-excursion
+                (goto-char (org-element-property :begin src-block))
+                (current-indentation))))
+    (cl-flet ((indent (x) (concat (make-string ind ?\s) x)))
+      (concat (indent "```") lang "\n"
+              (mapconcat #'identity (mapcar #'indent (split-string code "\n" t)) "\n")
+              "\n" (indent "```")))))
 
 ;;;; Example Block
 
