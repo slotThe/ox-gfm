@@ -58,8 +58,7 @@
               (if a (org-gfm-export-to-markdown t s v)
                 (org-open-file (org-gfm-export-to-markdown nil s v)))))))
   :options-alist
-  '((:fields nil nil '(title date last-modified tags og-description))
-    (:tags "TAGS" nil nil split)
+  '((:tags "TAGS" nil nil split)
     (:last-modified "LAST-MODIFIED" nil nil)
     (:og-description "OG-DESCRIPTION" nil nil))
   :translate-alist '((inner-template . org-gfm-inner-template)
@@ -268,23 +267,22 @@ INFO is a plist used as a communication channel."
 
 ;;;; YAML Front Matter
 
-(defun org-gfm--get-yaml (field info)
-  "Get the value for FIELD from INFO plist.
-Returns nil if the field is empty or disabled."
-  (pcase field
-    ('title          (car (plist-get info :title)))
-    ('date           (car (plist-get info :date)))
-    ('tags           (mapconcat #'identity (plist-get info :tags) " "))
-    ('last-modified  (plist-get info :last-modified))
-    ('og-description (plist-get info :og-description))))
-
 (defun org-gfm--build-yaml (info)
   "Build YAML front matter string from INFO plist.
 Returns nil if no fields have values."
-  (when-let* ((lines (seq-keep (lambda (f)
-                                 (when-let* ((val (org-gfm--get-yaml f info)))
-                                   (format "%s: %s" f val)))
-                               (plist-get info :fields))))
+  (when-let* ((lines (seq-keep
+                      (lambda (f)
+                        (when-let* ((field (plist-get info f))
+                                    (val (pcase f
+                                           (:title          #'car)
+                                           (:date           #'car)
+                                           (:tags           (lambda (x) (mapconcat #'identity x " ")))
+                                           (:last-modified  #'identity)
+                                           (:og-description #'identity))))
+                          (format "%s: %s"
+                                  (string-trim (pp-to-string f) ":" "\n")
+                                  (funcall val field))))
+                      '(:title :date :last-modified :tags :og-description))))
     (concat "---\n" (mapconcat #'identity lines "\n") "\n---\n\n")))
 
 ;;;; Template
