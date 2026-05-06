@@ -274,7 +274,10 @@ Returns nil if no fields have values."
                       (lambda (f)
                         (when-let* ((field (plist-get info f))
                                     (val (pcase f
-                                           (:title          #'car)
+                                           (:title          (lambda (x) (let ((x (car x)))
+                                                                     (if (string-match-p ":" x)
+                                                                         (concat "\"" (string-trim x "\"" "\"") "\"")
+                                                                       x))))
                                            (:date           #'car)
                                            (:tags           (lambda (x) (mapconcat #'identity x " ")))
                                            (:last-modified  #'identity)
